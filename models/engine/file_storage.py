@@ -10,23 +10,13 @@ class FileStorage:
 
     def all(self, cls=None):
         """Returns a dictionary of models currently in storage"""
-        if cls is not None:
-            class_dict = {}
-            for key, value in FileStorage.__objects.items():
-                if type(value) is cls:
-                    class_dict[key] = value
-
-            return class_dict
-        else:
-            return FileStorage.__objects
-
-    def delete(self, obj=None):
-        """ Public instance method that deletes given object"""
-        try:
-            key = "{}.{}".format(type(obj).__name__, obj.id)
-            del FileStorage.__objects[key]
-        except Exception:
-            pass
+        if cls is None:
+            return self.__objects
+        cls_dict = {}
+        for key, val in FileStorage.__objects.items():
+            if type(val) == cls:
+                cls_dict[key] = val
+        return cls_dict
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
@@ -39,7 +29,7 @@ class FileStorage:
             temp.update(FileStorage.__objects)
             for key, val in temp.items():
                 temp[key] = val.to_dict()
-            json.dump(temp, f)
+            json.dump(temp, f, indent=4)
 
     def reload(self):
         """Loads storage dictionary from file"""
@@ -65,6 +55,15 @@ class FileStorage:
         except FileNotFoundError:
             pass
 
+    def delete(self, obj=None):
+        """ Delete obj from __objects """
+        fs = FileStorage()
+        if obj is None:
+            return
+        key = obj.__class__.__name__ + "." + obj.id
+        if key in fs.__objects:
+            del fs.__objects[key]
+
     def close(self):
-        """Seyyarin can sagligi"""
+        """ jasjejeja sdjsejae ksdkdf s s """
         self.reload()
