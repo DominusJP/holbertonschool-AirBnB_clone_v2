@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """ State Module for HBNB project """
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 from os import getenv
 from models.city import City
@@ -9,22 +9,21 @@ from models.city import City
 
 class State(BaseModel, Base):
     """ State class """
-    __tablename__ = 'states'
+    __tablename__ = "states"
     name = Column(String(128), nullable=False)
-    cities = relationship('City', cascade='all, delete', backref='state')
 
-    def __init__(self, *args, **kwargs):
-        """ Initialization of State instance """
-        super().__init__(*args, **kwargs)
-
-    if getenv('HBNB_TYPE_STORAGE') != 'db':
+    if getenv('HBNB_TYPE_STORAGE') == 'db':
+        cities = relationship(
+            "City",
+            backref="state",
+            cascade='all, delete-orphan')
+    else:
         @property
         def cities(self):
-            """Getter Function for FileStorage"""
             from models import storage
-            result = []
-            all_cities = storage.all(City)
-            for city in all_cities.values():
+            c_instances = storage.all(City).values()
+            m_cities = []
+            for city in c_instances:
                 if city.state_id == self.id:
-                    result.append(city)
-            return result
+                    m_cities.append(city)
+            return m_cities
