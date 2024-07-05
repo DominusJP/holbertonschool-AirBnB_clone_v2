@@ -3,28 +3,33 @@
 from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
-from os import getenv
+import models
 from models.city import City
 
 
 class State(BaseModel, Base):
     """ State class """
-    __tablename__ = 'states'
-    name = Column(String(128), nullable=False)
-    cities = relationship('City', cascade='all, delete', backref='state')
+    __tablename__ = "states"
 
-    def __init__(self, *args, **kwargs):
-        """ Initialization of State instance """
-        super().__init__(*args, **kwargs)
+    name = Column(
+        String(128),
+        nullable=False
+    )
 
-    if getenv('HBNB_TYPE_STORAGE') != 'db':
+    from os import getenv
+    typeStorage = getenv("HBNB_TYPE_STORAGE")
+
+    if (typeStorage == "db"):
+        cities = relationship('City', backref="state", cascade="all, delete")
+
+    if typeStorage != 'db':
         @property
         def cities(self):
-            """Getter Function for FileStorage"""
-            from models import storage
-            result = []
-            all_cities = storage.all(City)
-            for city in all_cities.values():
-                if city.state_id == self.id:
-                    result.append(city)
-            return result
+            """ get list of City instances with state_id
+                equals to the current State.id """
+            list_cities = []
+            all_cities = models.storage.all(City)
+            for city_obj in all_cities.values():
+                if city_obj.state_id == self.id:
+                    list_cities.append(city_obj)
+            return list_cities
