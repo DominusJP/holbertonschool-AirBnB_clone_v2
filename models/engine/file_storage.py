@@ -64,7 +64,4 @@ class FileStorage:
                 del self.all()[key]
 
     def close(self):
-        """
-        close with reload
-        """
         self.reload()
